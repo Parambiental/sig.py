@@ -1,10 +1,11 @@
 import './styles.css';
 import { initMap } from './roles.js';
-import { showBadge } from './badges.js';
+import { renderBadge } from './badges.js';
+
+// Aquí puedes simular el rol (luego lo puedes conectar a un login real)
+const userRole = "novato"; // "ayudante" o "maestro"
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Simulación: rol puede venir de login
-  const userRole = "novato"; // "ayudante", "maestro"
   initMap(userRole);
-  showBadge(userRole);
+  renderBadge(userRole);
 });
