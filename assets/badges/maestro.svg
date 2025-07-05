@@ -1,0 +1,9 @@
+<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Círculo base -->
+  <circle cx="32" cy="32" r="30" fill="#8e44ad" stroke="#6c3483" stroke-width="4"/>
+  
+  <!-- Cubo isométrico blanco -->
+  <polygon points="32,20 44,28 32,36 20,28" fill="#ffffff" opacity="0.9"/> <!-- Top -->
+  <polygon points="32,36 44,28 44,40 32,48" fill="#dddddd" opacity="0.9"/> <!-- Right -->
+  <polygon points="32,36 20,28 20,40 32,48" fill="#ffffff" opacity="0.9"/> <!-- Left -->
+</svg>
