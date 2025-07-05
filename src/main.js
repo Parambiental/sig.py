@@ -1,9 +1,10 @@
-import { initMap } from './components/MapComponent.js';
-import { initSidebar } from './components/SidebarComponent.js';
-import { initUserProfile } from './components/UserProfile.js';
+import './styles.css';
+import { initMap } from './roles.js';
+import { showBadge } from './badges.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  initMap();
-  initSidebar();
-  initUserProfile();
+  // Simulación: rol puede venir de login
+  const userRole = "novato"; // "ayudante", "maestro"
+  initMap(userRole);
+  showBadge(userRole);
 });
