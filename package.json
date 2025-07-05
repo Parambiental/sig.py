@@ -1,0 +1,13 @@
+{
+  "name": "sig.py",
+  "version": "1.0.0",
+  "description": "Diagnóstico Ambiental Participativo WebApp",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "vite preview"
+  },
+  "dependencies": {
+    "vite": "^5.0.0"
+  }
+}
