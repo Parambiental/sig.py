@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Visor SIG - Fase 1 y 2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <style>
+    body { margin: 0; padding: 0; font-family: sans-serif; }
+    #map { height: 90vh; }
+    .controls {
+      padding: 10px;
+      background: #f0f0f0;
+      text-align: center;
+    }
+    .controls button {
+      margin: 0 10px;
+      padding: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button onclick="verFase('1')">Ver Fase 1</button>
+    <button onclick="verFase('2')">Ver Fase 2</button>
+    <button onclick="verFase('ambas')">Ver Ambas</button>
+  </div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map("map").setView([-23.5, -58], 6);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors"
+    }).addTo(map);
+
+    // Cargar capas (reemplazá con tus archivos reales)
+    const geojsonFase1 = "fase1.geojson"; // archivo local o URL remota
+    const geojsonFase2 = "fase2.geojson";
+
+    let capaFase1, capaFase2;
+
+    function cargarCapas() {
+      fetch(geojsonFase1)
+        .then(r => r.json())
+        .then(data => {
+          capaFase1 = L.geoJSON(data, {
+            style: { color: "blue" }
+          });
+        });
+
+      fetch(geojsonFase2)
+        .then(r => r.json())
+        .then(data => {
+          capaFase2 = L.geoJSON(data, {
+            style: { color: "red" }
+          });
+        });
+    }
+
+    function verFase(opcion) {
+      if (capaFase1) map.removeLayer(capaFase1);
+      if (capaFase2) map.removeLayer(capaFase2);
+
+      if (opcion === '1' && capaFase1) capaFase1.addTo(map);
+      if (opcion === '2' && capaFase2) capaFase2.addTo(map);
+      if (opcion === 'ambas') {
+        if (capaFase1) capaFase1.addTo(map);
+        if (capaFase2) capaFase2.addTo(map);
+      }
+    }
+
+    cargarCapas();
+  </script>
+</body>
+</html>
