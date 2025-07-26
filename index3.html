@@ -2,80 +2,209 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Visor SIG - Fase 1 y 2</title>
+  <title>Visor SIG - Fases del Proyecto</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzxH+iPxlccPcNNAevB9RvZXqo="
+    crossorigin=""
   />
   <style>
-    body { margin: 0; padding: 0; font-family: sans-serif; }
-    #map { height: 90vh; }
-    .controls {
-      padding: 10px;
-      background: #f0f0f0;
-      text-align: center;
+    /* Estilos básicos para el cuerpo de la página */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente más moderna */
+      background-color: #f4f4f4; /* Un color de fondo suave */
     }
+    /* Estilo para el contenedor del mapa */
+    #map {
+      height: 90vh; /* Ocupa el 90% de la altura de la ventana */
+      width: 100%; /* Ocupa el 100% del ancho */
+      border: 1px solid #ccc; /* Un borde sutil alrededor del mapa */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra ligera para un efecto de elevación */
+    }
+    /* Estilos para el contenedor de controles */
+    .controls {
+      padding: 12px;
+      background: #ffffff; /* Fondo blanco para los controles */
+      text-align: center;
+      border-bottom: 1px solid #ddd; /* Línea separadora inferior */
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra ligera */
+    }
+    /* Estilos para los botones de control */
     .controls button {
-      margin: 0 10px;
-      padding: 10px;
+      margin: 0 12px; /* Margen horizontal entre botones */
+      padding: 10px 20px;
       font-weight: bold;
+      border: none; /* Sin borde */
+      border-radius: 5px; /* Bordes redondeados */
+      cursor: pointer; /* Cursor de puntero al pasar por encima */
+      transition: background-color 0.3s ease, transform 0.2s ease; /* Transición suave para efectos hover */
+      background-color: #007bff; /* Color azul primario */
+      color: white; /* Texto blanco */
+      font-size: 16px;
+    }
+    /* Efecto al pasar el ratón por encima de los botones */
+    .controls button:hover {
+      background-color: #0056b3; /* Un azul más oscuro al hacer hover */
+      transform: translateY(-2px); /* Pequeño desplazamiento hacia arriba */
+    }
+    /* Estilo para botones activos/seleccionados (opcional, si se implementa lógica de "activo") */
+    .controls button.active {
+      background-color: #28a745; /* Color verde para el botón activo */
     }
   </style>
 </head>
 <body>
   <div class="controls">
-    <button onclick="verFase('1')">Ver Fase 1</button>
-    <button onclick="verFase('2')">Ver Fase 2</button>
-    <button onclick="verFase('ambas')">Ver Ambas</button>
+    <button onclick="mostrarFase('1')">Ver Fase 1</button>
+    <button onclick="mostrarFase('2')">Ver Fase 2</button>
+    <button onclick="mostrarFase('ambas')">Ver Ambas Fases</button>
   </div>
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20n6FLzFVfA/JSsdN7/GPjM0bg6gUM/RztdMfe9FhXk="
+    crossorigin=""
+  ></script>
   <script>
+    // Inicializa el mapa en el div con id "map"
+    // Establece la vista inicial en Paraguay (latitud -23.5, longitud -58) con un nivel de zoom 6
     const map = L.map("map").setView([-23.5, -58], 6);
 
+    // Añade la capa base de OpenStreetMap al mapa
+    // Esto proporciona el fondo del mapa con calles, etc.
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors"
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Cargar capas (reemplazá con tus archivos reales)
-    const geojsonFase1 = "fase1.geojson"; // archivo local o URL remota
-    const geojsonFase2 = "fase2.geojson";
+    // Definición de las rutas a los archivos GeoJSON para cada fase.
+    // Asegúrate de que estos archivos estén en la misma carpeta que tu HTML
+    // o proporciona la URL completa si están alojados en otro lugar.
+    const geojsonFase1Url = "fase1.geojson";
+    const geojsonFase2Url = "fase2.geojson";
 
-    let capaFase1, capaFase2;
+    let capaFase1; // Variable para almacenar la capa GeoJSON de la Fase 1
+    let capaFase2; // Variable para almacenar la capa GeoJSON de la Fase 2
 
-    function cargarCapas() {
-      fetch(geojsonFase1)
-        .then(r => r.json())
+    /**
+     * Función para cargar las capas GeoJSON de las fases.
+     * Se ejecuta una sola vez al inicio para precargar los datos.
+     */
+    function cargarCapasGeoJSON() {
+      // Carga la Fase 1
+      fetch(geojsonFase1Url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Error al cargar ${geojsonFase1Url}: ${response.statusText}`);
+          }
+          return response.json();
+        })
         .then(data => {
           capaFase1 = L.geoJSON(data, {
-            style: { color: "blue" }
+            style: {
+              color: "#007bff",   // Azul brillante
+              weight: 3,          // Grosor de la línea
+              opacity: 0.8,       // Opacidad de la línea
+              fillOpacity: 0.3    // Opacidad de relleno para polígonos
+            },
+            onEachFeature: function (feature, layer) {
+              // Ejemplo: Añadir un popup con propiedades si existen
+              if (feature.properties && feature.properties.nombre) {
+                layer.bindPopup(`<b>Fase 1:</b> ${feature.properties.nombre}`);
+              } else if (feature.properties) {
+                 layer.bindPopup('<b>Fase 1 Detalle</b><pre>' + JSON.stringify(feature.properties, null, 2) + '</pre>');
+              }
+            }
           });
-        });
+          // Opcional: Mostrar la Fase 1 por defecto al cargar si lo deseas
+          // capaFase1.addTo(map);
+        })
+        .catch(error => console.error("No se pudo cargar la Fase 1:", error));
 
-      fetch(geojsonFase2)
-        .then(r => r.json())
+      // Carga la Fase 2
+      fetch(geojsonFase2Url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Error al cargar ${geojsonFase2Url}: ${response.statusText}`);
+          }
+          return response.json();
+        })
         .then(data => {
           capaFase2 = L.geoJSON(data, {
-            style: { color: "red" }
+            style: {
+              color: "#dc3545",   // Rojo vibrante
+              weight: 3,
+              opacity: 0.8,
+              fillOpacity: 0.3
+            },
+            onEachFeature: function (feature, layer) {
+              // Ejemplo: Añadir un popup con propiedades si existen
+              if (feature.properties && feature.properties.nombre) {
+                layer.bindPopup(`<b>Fase 2:</b> ${feature.properties.nombre}`);
+              } else if (feature.properties) {
+                 layer.bindPopup('<b>Fase 2 Detalle</b><pre>' + JSON.stringify(feature.properties, null, 2) + '</pre>');
+              }
+            }
           });
-        });
+        })
+        .catch(error => console.error("No se pudo cargar la Fase 2:", error));
     }
 
-    function verFase(opcion) {
-      if (capaFase1) map.removeLayer(capaFase1);
-      if (capaFase2) map.removeLayer(capaFase2);
+    /**
+     * Función para mostrar u ocultar las capas de las fases en el mapa.
+     * @param {string} opcion - '1' para Fase 1, '2' para Fase 2, 'ambas' para ambas.
+     */
+    function mostrarFase(opcion) {
+      // Primero, elimina ambas capas del mapa para asegurar que solo se muestre lo deseado.
+      if (capaFase1 && map.hasLayer(capaFase1)) {
+        map.removeLayer(capaFase1);
+      }
+      if (capaFase2 && map.hasLayer(capaFase2)) {
+        map.removeLayer(capaFase2);
+      }
 
-      if (opcion === '1' && capaFase1) capaFase1.addTo(map);
-      if (opcion === '2' && capaFase2) capaFase2.addTo(map);
-      if (opcion === 'ambas') {
-        if (capaFase1) capaFase1.addTo(map);
-        if (capaFase2) capaFase2.addTo(map);
+      // Luego, añade la(s) capa(s) según la opción seleccionada.
+      if (opcion === '1') {
+        if (capaFase1) {
+          capaFase1.addTo(map);
+          // Opcional: Ajustar el mapa para que se ajuste a los límites de la capa
+          // map.fitBounds(capaFase1.getBounds());
+        } else {
+          console.warn("La capa de la Fase 1 aún no ha sido cargada.");
+        }
+      } else if (opcion === '2') {
+        if (capaFase2) {
+          capaFase2.addTo(map);
+          // Opcional: Ajustar el mapa para que se ajuste a los límites de la capa
+          // map.fitBounds(capaFase2.getBounds());
+        } else {
+          console.warn("La capa de la Fase 2 aún no ha sido cargada.");
+        }
+      } else if (opcion === 'ambas') {
+        if (capaFase1) {
+          capaFase1.addTo(map);
+        } else {
+          console.warn("La capa de la Fase 1 aún no ha sido cargada.");
+        }
+        if (capaFase2) {
+          capaFase2.addTo(map);
+        } else {
+          console.warn("La capa de la Fase 2 aún no ha sido cargada.");
+        }
+        // Opcional: Ajustar el mapa para que se ajuste a los límites de ambas capas combinadas
+        // if (capaFase1 && capaFase2) {
+        //   const combinedBounds = capaFase1.getBounds().extend(capaFase2.getBounds());
+        //   map.fitBounds(combinedBounds);
+        // }
       }
     }
 
-    cargarCapas();
+    // Llama a la función para cargar las capas cuando se carga la página.
+    // Esto asegura que los datos estén listos cuando el usuario haga clic en los botones.
+    cargarCapasGeoJSON();
   </script>
 </body>
 </html>
